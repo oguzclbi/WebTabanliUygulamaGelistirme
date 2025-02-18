@@ -1,0 +1,36 @@
+body {
+    text-align: center;
+}
+
+#banner {
+    background-color: tomato;
+    width: 100%;
+    height: 40px;
+}
+
+#left {
+    background-color: lightseagreen;
+    width: 25%;
+    height: 160px;
+    float: left;
+}
+
+#center {
+    width: 50%;
+    height: 80%;
+    float: left;
+}
+
+#right {
+    background-color: lightseagreen;
+    width: 25%;
+    height: 160px;
+    float: left;
+}
+
+#footer {
+    background-color: darkgray;
+    width: 100%;
+    height: 40px;
+    clear: both;
+}
