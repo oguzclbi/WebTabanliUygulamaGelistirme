@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="tr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Seçici Örnek</title>
+
+</head>
+
+<body style="background-color: orange;">
+
+    <div>
+        <h1 id="baslik">Başlık</h1>
+    </div>
+    <div>
+        <p id="icerik">Bu bir paragraftır.+++++++++++++++++++++</p>
+        <p id="paragraf">Diğer bir paragraf.</p>
+
+    </div>
+    <div>
+        <input type="text" name="kullaniciAdi" value="Mehmet" id="adSoyad" />
+    </div>
+    <div>
+        <span class="harfler">J</span>
+        <span class="harfler">S</span>
+        <span class="harfler">cript</span>
+    </div>
+
+    <script>
+       
+        
+            // ID Seçici: 'baslik' ID'sine sahip elemanın font boyutunu değiştir.
+            document.getElementById("baslik").style.fontSize = "52px";
+
+            // ID Seçici: 'icerik' ID'sine sahip elemanın içeriğini değiştirdik.
+            document.getElementById("icerik").innerHTML = "<b>Bu yazı kalın bir yazıdır.</b>";
+
+            // ID Seçici: 'paragraf' ID'sine sahip elemanın metnini değiştirdik.
+            document.getElementById("paragraf").innerText = "Paragrafa yeni cümleler eklenebilir.";
+
+            // ID Seçici: 'adSoyad' ID'sine sahip input alanının değerini değiştirdik.
+            document.getElementById("adSoyad").value = "Mustafa ÖZER";
+
+            // Class Seçici: 'harfler' sınıfına sahip ilk iki span elemanının stilini değiştirdik.
+            document.getElementsByClassName("harfler")[0].style.fontSize = "22px";
+            document.getElementsByClassName("harfler")[1].style.fontSize = "22px";
+            document.getElementsByClassName("harfler")[0].style.color = "white";
+            document.getElementsByClassName("harfler")[1].style.color = "white";
+
+            // Name Seçici: 'kullaniciAdi' adını taşıyan input elemanının arka plan rengini değiştirdik.
+            document.getElementsByName("kullaniciAdi")[0].style.backgroundColor = "red";
+
+            // TagName Seçici: 'span' etiketine sahip üçüncü elemanın alt kenarlığını değiştirdik.
+            document.getElementsByTagName("span")[2].style.borderBottomStyle = "solid";
+            document.getElementsByTagName("span")[2].style.borderBottomSize = "2px";
+        
+    </script>
+
+</body>
+
+</html>
