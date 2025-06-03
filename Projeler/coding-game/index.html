@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Kodu Tamamla Oyunu</title>
+  <script src="https://unpkg.com/blockly/blockly.min.js"></script>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 0; padding: 20px; background-color: #f0f0f0; }
+    #blocklyDiv { width: 50%; height: 500px; float: left; }
+    #output { width: 40%; height: 500px; float: right; background: white; padding: 10px; border: 1px solid #ccc; }
+    #score { font-size: 20px; margin-bottom: 10px; }
+    #timer { font-size: 20px; margin-bottom: 10px; }
+    #task { font-size: 18px; margin-bottom: 10px; }
+    button { padding: 10px 20px; font-size: 16px; cursor: pointer; }
+  </style>
+</head>
+<body>
+  <div id="score">Puan: 0</div>
+  <div id="timer">Kalan Süre: 60</div>
+  <div id="task">Görev 1: Bir değişken tanımla ve değerini 5 artır.</div>
+  <div id="blocklyDiv"></div>
+  <div id="output"></div>
+  <button onclick="runCode()">Kodu Çalıştır</button>
+  <button onclick="nextTask()">Sonraki Görev</button>
+
+  <script>
+    // Blockly çalışma alanı
+    let workspace = Blockly.inject('blocklyDiv', {
+      toolbox: `
+        <xml>
+          <block type="variables_set"></block>
+          <block type="math_change"></block>
+          <block type="controls_if"></block>
+          <block type="controls_for"></block>
+          <block type="text_print"></block>
+          <block type="math_number"></block>
+          <block type="logic_compare"></block>
+        </xml>`
+    });
+
+    // Oyun durumu
+    let score = 0;
+    let timeLeft = 60;
+    let currentTask = 0;
+    let timerInterval;
+
+    // Görev tanımları
+    const tasks = [
+      {
+        description: "Görev 1: Bir değişken tanımla ve değerini 5 artır.",
+        validator: (output) => output.includes("x = 5")
+      },
+      {
+        description: "Görev 2: 1’den 10’a kadar sayıları ekrana yazdır.",
+        validator: (output) => output.includes("1\n2\n3\n4\n5\n6\n7\n8\n9\n10")
+      },
+      {
+        description: "Görev 3: Bir sayı 7’den büyükse, 'Büyük!' mesajı göster.",
+        validator: (output) => output.includes("Büyük!")
+      }
+    ];
+
+    // Süre sayacı
+    function startTimer() {
+      timeLeft = 60;
+      document.getElementById('timer').textContent = `Kalan Süre: ${timeLeft}`;
+      timerInterval = setInterval(() => {
+        timeLeft--;
+        document.getElementById('timer').textContent = `Kalan Süre: ${timeLeft}`;
+        if (timeLeft <= 0) {
+          clearInterval(timerInterval);
+          alert('Süre bitti! Görevi tekrar dene.');
+          resetTask();
+        }
+      }, 1000);
+    }
+
+    // Kodu çalıştırma
+    function runCode() {
+      let output = "";
+      Blockly.JavaScript.addReservedWords('output');
+      let code = Blockly.JavaScript.workspaceToCode(workspace);
+      try {
+        eval(code.replace(/console.log/g, "output += "));
+        document.getElementById('output').textContent = output;
+        if (tasks[currentTask].validator(output)) {
+          score += timeLeft > 0 ? 150 : 100;
+          document.getElementById('score').textContent = `Puan: ${score}`;
+          alert('Tebrikler! Görev tamamlandı.');
+          clearInterval(timerInterval);
+        } else {
+          document.getElementById('output').textContent = "Hatalı çözüm. Tekrar dene!";
+        }
+      } catch (e) {
+        document.getElementById('output').textContent = "Hata: " + e.message;
+      }
+    }
+
+    // Sonraki görev
+    function nextTask() {
+      currentTask++;
+      if (currentTask >= tasks.length) {
+        alert(`Oyun bitti! Toplam puan: ${score}`);
+        currentTask = 0;
+        score = 0;
+      }
+      document.getElementById('task').textContent = tasks[currentTask].description;
+      document.getElementById('score').textContent = `Puan: ${score}`;
+      document.getElementById('output').textContent = "";
+      workspace.clear();
+      clearInterval(timerInterval);
+      startTimer();
+    }
+
+    // Görevi sıfırlama
+    function resetTask() {
+      document.getElementById('output').textContent = "";
+      workspace.clear();
+      startTimer();
+    }
+
+    // Oyunu başlat
+    startTimer();
+  </script>
+</body>
+</html>

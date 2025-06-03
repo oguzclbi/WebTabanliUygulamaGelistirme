@@ -1,0 +1,803 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kodlama Macerası</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/blockly/10.2.2/blockly.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/blockly/10.2.2/blocks.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/blockly/10.2.2/javascript.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/blockly/10.2.2/msg/tr.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        .game-container {
+            display: grid;
+            grid-template-columns: 1fr 400px 1fr;
+            grid-template-rows: 80px 1fr 100px;
+            height: 100vh;
+            gap: 10px;
+            padding: 10px;
+        }
+
+        .header {
+            grid-column: 1 / -1;
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 30px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        }
+
+        .logo {
+            font-size: 24px;
+            font-weight: bold;
+            color: #4f46e5;
+        }
+
+        .game-stats {
+            display: flex;
+            gap: 30px;
+            align-items: center;
+        }
+
+        .stat-item {
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 24px;
+            font-weight: bold;
+            color: #1f2937;
+        }
+
+        .stat-label {
+            font-size: 12px;
+            color: #6b7280;
+            text-transform: uppercase;
+        }
+
+        .blockly-area {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        .game-area {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .mission-panel {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .mission-title {
+            font-size: 18px;
+            font-weight: bold;
+            color: #1f2937;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+
+        .mission-description {
+            background: #f3f4f6;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            border-left: 4px solid #4f46e5;
+        }
+
+        .timer {
+            background: linear-gradient(45deg, #ff6b6b, #ee5a52);
+            color: white;
+            padding: 10px;
+            border-radius: 10px;
+            text-align: center;
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 20px;
+        }
+
+        .controls {
+            grid-column: 1 / -1;
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            align-items: center;
+        }
+
+        .btn {
+            padding: 12px 30px;
+            border: none;
+            border-radius: 25px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+        }
+
+        .btn-primary {
+            background: linear-gradient(45deg, #4f46e5, #7c3aed);
+            color: white;
+        }
+
+        .btn-success {
+            background: linear-gradient(45deg, #10b981, #059669);
+            color: white;
+        }
+
+        .btn-warning {
+            background: linear-gradient(45deg, #f59e0b, #d97706);
+            color: white;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+        }
+
+        .character {
+            width: 50px;
+            height: 50px;
+            background: #4f46e5;
+            border-radius: 50%;
+            position: relative;
+            margin: 20px;
+            transition: all 0.5s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 20px;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(5, 60px);
+            grid-template-rows: repeat(5, 60px);
+            gap: 2px;
+            margin: 20px auto;
+            background: #e5e7eb;
+            padding: 10px;
+            border-radius: 10px;
+        }
+
+        .grid-cell {
+            background: white;
+            border: 2px solid #d1d5db;
+            border-radius: 5px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            transition: all 0.3s ease;
+        }
+
+        .goal {
+            background: #10b981;
+            color: white;
+        }
+
+        .obstacle {
+            background: #ef4444;
+            color: white;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 20px;
+            background: #e5e7eb;
+            border-radius: 10px;
+            overflow: hidden;
+            margin-bottom: 20px;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(45deg, #10b981, #059669);
+            width: 0%;
+            transition: width 0.5s ease;
+        }
+
+        .achievement {
+            background: #fef3c7;
+            border: 2px solid #f59e0b;
+            border-radius: 10px;
+            padding: 10px;
+            margin-top: 10px;
+            text-align: center;
+            animation: bounce 0.5s ease;
+        }
+
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
+            40% { transform: translateY(-10px); }
+            60% { transform: translateY(-5px); }
+        }
+
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 15px 25px;
+            border-radius: 10px;
+            color: white;
+            font-weight: bold;
+            z-index: 1000;
+            animation: slideIn 0.3s ease;
+        }
+
+        .notification.success { background: #10b981; }
+        .notification.error { background: #ef4444; }
+        .notification.info { background: #3b82f6; }
+
+        @keyframes slideIn {
+            from { transform: translateX(100%); }
+            to { transform: translateX(0); }
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <!-- Header -->
+        <div class="header">
+            <div class="logo">🎮 Kodlama Macerası</div>
+            <div class="game-stats">
+                <div class="stat-item">
+                    <div class="stat-value" id="score">0</div>
+                    <div class="stat-label">Puan</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value" id="level">1</div>
+                    <div class="stat-label">Seviye</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value" id="completed">0</div>
+                    <div class="stat-label">Tamamlanan</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Blockly Area -->
+        <div class="blockly-area">
+            <div id="blocklyDiv" style="height: 100%; width: 100%;"></div>
+        </div>
+
+        <!-- Game Area -->
+        <div class="game-area">
+            <h3 style="text-align: center; margin-bottom: 20px; color: #1f2937;">Oyun Alanı</h3>
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressFill"></div>
+            </div>
+            <div class="grid" id="gameGrid"></div>
+            <div id="achievements"></div>
+        </div>
+
+        <!-- Mission Panel -->
+        <div class="mission-panel">
+            <div class="mission-title" id="missionTitle">Görev 1: İlk Adım</div>
+            <div class="timer" id="timer">⏰ 60 saniye</div>
+            <div class="mission-description" id="missionDescription">
+                Karakteri başlangıç noktasından hedefe götür! 
+                <br><br>
+                <strong>Görev:</strong> "İleri git" bloklarını kullanarak karakteri yeşil hedefe ulaştır.
+                <br><br>
+                <strong>İpucu:</strong> Blockly alanından blokları sürükleyip kodunu oluştur!
+            </div>
+            <div style="flex: 1;"></div>
+            <div class="btn btn-warning" id="hintBtn">💡 İpucu Al</div>
+        </div>
+
+        <!-- Controls -->
+        <div class="controls">
+            <button class="btn btn-primary" id="runBtn">▶️ Kodu Çalıştır</button>
+            <button class="btn btn-warning" id="resetBtn">🔄 Sıfırla</button>
+            <button class="btn btn-success" id="nextBtn" style="display: none;">➡️ Sonraki Görev</button>
+        </div>
+    </div>
+
+    <script>
+        // Oyun değişkenleri
+        let gameState = {
+            score: 0,
+            level: 1,
+            completed: 0,
+            timeLeft: 60,
+            characterPosition: { x: 0, y: 0 },
+            goalPosition: { x: 4, y: 4 },
+            obstacles: [],
+            isRunning: false,
+            timer: null
+        };
+
+        let missions = [
+            {
+                title: "Görev 1: İlk Adım",
+                description: "Karakteri başlangıç noktasından hedefe götür!<br><br><strong>Görev:</strong> Robot sol alt köşede (🤖), hedef sağ alt köşede (🎯). Robotu sağa doğru hareket ettir.<br><br><strong>İpucu:</strong> 'İleri git' bloğunu kullan!",
+                timeLimit: 60,
+                points: 100,
+                obstacles: [],
+                startPos: {x: 0, y: 4},
+                goalPos: {x: 4, y: 4},
+                hint: "4 kez 'İleri git' bloğunu yan yana sürükle!"
+            },
+            {
+                title: "Görev 2: Engelleri Aş",
+                description: "Bu sefer yolda engeller var!<br><br><strong>Görev:</strong> Robot sol üstte (🤖), hedef sağ altta (🎯). Kırmızı engellerden (🚧) kaçınarak hedefe ulaş.<br><br><strong>İpucu:</strong> Önce yukarı, sonra sağa git!",
+                timeLimit: 90,
+                points: 150,
+                obstacles: [{x: 1, y: 1}, {x: 2, y: 1}, {x: 3, y: 1}],
+                startPos: {x: 0, y: 0},
+                goalPos: {x: 4, y: 4},
+                hint: "4 kez aşağı git, sonra 4 kez sağa git!"
+            },
+            {
+                title: "Görev 3: Döngü Kullanımı",
+                description: "Tekrarlanan hareketler için döngü kullan!<br><br><strong>Görev:</strong> Robot sol üstte (🤖), hedef sağ üstte (🎯). Bu sefer 'Tekrarla' bloğunu kullan.<br><br><strong>İpucu:</strong> Aynı hareketi tekrar tekrar yazmak yerine döngü kullan!",
+                timeLimit: 120,
+                points: 200,
+                obstacles: [{x: 1, y: 2}, {x: 2, y: 2}, {x: 3, y: 2}],
+                startPos: {x: 0, y: 0},
+                goalPos: {x: 4, y: 0},
+                hint: "'4 kez tekrarla' bloğu içine 'İleri git' koy!"
+            }
+        ];
+
+        let currentMission = 0;
+
+        // Blockly workspace
+        let workspace;
+
+        // Oyunu başlat
+        function initGame() {
+            initBlockly();
+            createGrid();
+            loadMission(currentMission);
+            startTimer();
+            
+            // Event listeners
+            document.getElementById('runBtn').addEventListener('click', runCode);
+            document.getElementById('resetBtn').addEventListener('click', resetGame);
+            document.getElementById('nextBtn').addEventListener('click', nextMission);
+            document.getElementById('hintBtn').addEventListener('click', showHint);
+        }
+
+        // Blockly'yi başlat
+        function initBlockly() {
+            const toolbox = `
+            <xml id="toolbox" style="display: none">
+                <category name="Hareket" colour="#5C81A6">
+                    <block type="move_forward"></block>
+                    <block type="turn_right"></block>
+                    <block type="turn_left"></block>
+                </category>
+                <category name="Döngüler" colour="#5CA65C">
+                    <block type="controls_repeat_ext">
+                        <value name="TIMES">
+                            <shadow type="math_number">
+                                <field name="NUM">4</field>
+                            </shadow>
+                        </value>
+                    </block>
+                </category>
+            </xml>`;
+
+            workspace = Blockly.inject('blocklyDiv', {
+                toolbox: toolbox,
+                scrollbars: true,
+                trashcan: true,
+                zoom: {
+                    controls: true,
+                    wheel: true,
+                    startScale: 1.0,
+                    maxScale: 3,
+                    minScale: 0.3,
+                    scaleSpeed: 1.2
+                }
+            });
+
+            // Özel blokları tanımla
+            defineCustomBlocks();
+        }
+
+        // Karakter yönü
+        let characterDirection = 0; // 0: sağ, 1: aşağı, 2: sol, 3: yukarı
+
+        // Özel blokları tanımla
+        function defineCustomBlocks() {
+            // İleri git bloğu
+            Blockly.Blocks['move_forward'] = {
+                init: function() {
+                    this.appendDummyInput()
+                        .appendField("İleri git");
+                    this.setPreviousStatement(true, null);
+                    this.setNextStatement(true, null);
+                    this.setColour(160);
+                    this.setTooltip("Karakteri baktığı yöne doğru bir adım hareket ettirir");
+                }
+            };
+
+            // Sağa dön bloğu
+            Blockly.Blocks['turn_right'] = {
+                init: function() {
+                    this.appendDummyInput()
+                        .appendField("Sağa dön");
+                    this.setPreviousStatement(true, null);
+                    this.setNextStatement(true, null);
+                    this.setColour(230);
+                    this.setTooltip("Karakteri sağa çevirir");
+                }
+            };
+
+            // Sola dön bloğu
+            Blockly.Blocks['turn_left'] = {
+                init: function() {
+                    this.appendDummyInput()
+                        .appendField("Sola dön");
+                    this.setPreviousStatement(true, null);
+                    this.setNextStatement(true, null);
+                    this.setColour(230);
+                    this.setTooltip("Karakteri sola çevirir");
+                }
+            };
+
+            // JavaScript kod üretimi
+            Blockly.JavaScript['move_forward'] = function(block) {
+                return 'await moveForward();\n';
+            };
+
+            Blockly.JavaScript['turn_right'] = function(block) {
+                return 'await turnRight();\n';
+            };
+
+            Blockly.JavaScript['turn_left'] = function(block) {
+                return 'await turnLeft();\n';
+            };
+        }
+
+        // Grid oluştur
+        function createGrid() {
+            const grid = document.getElementById('gameGrid');
+            grid.innerHTML = '';
+            
+            for (let y = 0; y < 5; y++) {
+                for (let x = 0; x < 5; x++) {
+                    const cell = document.createElement('div');
+                    cell.className = 'grid-cell';
+                    cell.id = `cell-${x}-${y}`;
+                    
+                    if (x === gameState.goalPosition.x && y === gameState.goalPosition.y) {
+                        cell.classList.add('goal');
+                        cell.innerHTML = '🎯';
+                    }
+                    
+                    grid.appendChild(cell);
+                }
+            }
+            
+            updateCharacterPosition();
+        }
+
+        // Karakterin pozisyonunu güncelle
+        function updateCharacterPosition(isRotating = false) {
+            // Önceki pozisyonu temizle
+            document.querySelectorAll('.grid-cell').forEach(cell => {
+                if (cell.innerHTML === '🤖' || cell.innerHTML.includes('🤖')) {
+                    if (cell.classList.contains('goal')) {
+                        cell.innerHTML = '🎯';
+                    } else if (cell.classList.contains('obstacle')) {
+                        cell.innerHTML = '🚧';
+                    } else {
+                        cell.innerHTML = '';
+                    }
+                }
+            });
+            
+            // Yeni pozisyona karakter ekle
+            const cell = document.getElementById(`cell-${gameState.characterPosition.x}-${gameState.characterPosition.y}`);
+            if (cell) {
+                cell.innerHTML = '🤖';
+                
+                // Rotasyon ayarları
+                const rotations = ['rotate(0deg)', 'rotate(90deg)', 'rotate(180deg)', 'rotate(270deg)'];
+                
+                if (isRotating) {
+                    // Dönme animasyonu - spin efekti
+                    cell.style.transform = `scale(1.1) ${rotations[characterDirection]}`;
+                    cell.style.transition = 'transform 0.4s ease-in-out';
+                    
+                    setTimeout(() => {
+                        cell.style.transform = `scale(1) ${rotations[characterDirection]}`;
+                    }, 200);
+                } else {
+                    // Normal hareket - sadece hafif büyüme efekti
+                    cell.style.transform = `scale(1.1) ${rotations[characterDirection]}`;
+                    cell.style.transition = 'transform 0.2s ease';
+                    
+                    setTimeout(() => {
+                        cell.style.transform = `scale(1) ${rotations[characterDirection]}`;
+                    }, 150);
+                }
+            }
+        }
+
+        // Görev yükle
+        function loadMission(index) {
+            if (index >= missions.length) {
+                showNotification('Tebrikler! Tüm görevleri tamamladın!', 'success');
+                return;
+            }
+
+            const mission = missions[index];
+            document.getElementById('missionTitle').innerHTML = mission.title;
+            document.getElementById('missionDescription').innerHTML = mission.description;
+            
+            gameState.timeLeft = mission.timeLimit;
+            gameState.obstacles = mission.obstacles;
+            
+            // Başlangıç ve hedef pozisyonlarını ayarla
+            gameState.characterPosition = { ...mission.startPos };
+            gameState.goalPosition = { ...mission.goalPos };
+            characterDirection = 0; // Sağa bakacak şekilde başla
+            
+            // Grid'i güncelle
+            createGrid();
+            
+            // Engelleri ekle
+            mission.obstacles.forEach(obstacle => {
+                const cell = document.getElementById(`cell-${obstacle.x}-${obstacle.y}`);
+                if (cell) {
+                    cell.classList.add('obstacle');
+                    cell.innerHTML = '🚧';
+                }
+            });
+            
+            updateCharacterPosition();
+            updateUI();
+        }
+
+        // Timer başlat
+        function startTimer() {
+            if (gameState.timer) clearInterval(gameState.timer);
+            
+            gameState.timer = setInterval(() => {
+                gameState.timeLeft--;
+                updateTimer();
+                
+                if (gameState.timeLeft <= 0) {
+                    clearInterval(gameState.timer);
+                    showNotification('Süre doldu! Tekrar dene.', 'error');
+                    resetGame();
+                }
+            }, 1000);
+        }
+
+        // Timer güncelle
+        function updateTimer() {
+            const minutes = Math.floor(gameState.timeLeft / 60);
+            const seconds = gameState.timeLeft % 60;
+            document.getElementById('timer').innerHTML = `⏰ ${minutes}:${seconds.toString().padStart(2, '0')}`;
+        }
+
+        // Kodu çalıştır
+        function runCode() {
+            if (gameState.isRunning) return;
+            
+            const code = Blockly.JavaScript.workspaceToCode(workspace);
+            
+            if (!code.trim()) {
+                showNotification('Önce kodunuzu oluşturun!', 'error');
+                return;
+            }
+            
+            gameState.isRunning = true;
+            document.getElementById('runBtn').disabled = true;
+            
+            // Karakter hareket fonksiyonları
+            window.moveForward = () => {
+                return new Promise(resolve => {
+                    let newX = gameState.characterPosition.x;
+                    let newY = gameState.characterPosition.y;
+                    
+                    // Yöne göre hareket et
+                    switch(characterDirection) {
+                        case 0: newX++; break; // sağ
+                        case 1: newY++; break; // aşağı
+                        case 2: newX--; break; // sol
+                        case 3: newY--; break; // yukarı
+                    }
+                    
+                    // Sınır kontrolü
+                    if (newX < 0 || newX >= 5 || newY < 0 || newY >= 5) {
+                        showNotification('Sınırların dışına çıkamazsın!', 'error');
+                        resolve();
+                        return;
+                    }
+                    
+                    // Engel kontrolü
+                    const hasObstacle = gameState.obstacles.some(obs => obs.x === newX && obs.y === newY);
+                    if (hasObstacle) {
+                        showNotification('Engele çarptın!', 'error');
+                        resolve();
+                        return;
+                    }
+                    
+                    // Hareket et
+                    gameState.characterPosition.x = newX;
+                    gameState.characterPosition.y = newY;
+                    
+                    setTimeout(() => {
+                        updateCharacterPosition(false); // normal hareket animasyonu
+                        checkWin();
+                        resolve();
+                    }, 600); // Daha yavaş hareket
+                });
+            };
+            
+            window.turnRight = () => {
+                return new Promise(resolve => {
+                    characterDirection = (characterDirection + 1) % 4;
+                    setTimeout(() => {
+                        updateCharacterPosition(true); // dönme animasyonu aktif
+                        resolve();
+                    }, 400);
+                });
+            };
+            
+            window.turnLeft = () => {
+                return new Promise(resolve => {
+                    characterDirection = (characterDirection + 3) % 4; // -1 ama pozitif
+                    setTimeout(() => {
+                        updateCharacterPosition(true); // dönme animasyonu aktif
+                        resolve();
+                    }, 400);
+                });
+            };
+            
+            try {
+                // Async fonksiyon oluştur ve çalıştır
+                const asyncCode = `(async function() { ${code} })()`;
+                eval(asyncCode).then(() => {
+                    gameState.isRunning = false;
+                    document.getElementById('runBtn').disabled = false;
+                }).catch((error) => {
+                    console.error('Kod çalıştırma hatası:', error);
+                    gameState.isRunning = false;
+                    document.getElementById('runBtn').disabled = false;
+                    showNotification('Kodda hata var!', 'error');
+                });
+            } catch (error) {
+                console.error('Kod parse hatası:', error);
+                gameState.isRunning = false;
+                document.getElementById('runBtn').disabled = false;
+                showNotification('Kodda hata var!', 'error');
+            }
+        }
+
+        // Kazanma kontrolü
+        function checkWin() {
+            if (gameState.characterPosition.x === gameState.goalPosition.x && 
+                gameState.characterPosition.y === gameState.goalPosition.y) {
+                
+                clearInterval(gameState.timer);
+                const mission = missions[currentMission];
+                const timeBonus = Math.max(0, gameState.timeLeft * 2);
+                const totalPoints = mission.points + timeBonus;
+                
+                gameState.score += totalPoints;
+                gameState.completed++;
+                
+                showNotification(`Tebrikler! +${totalPoints} puan kazandın!`, 'success');
+                document.getElementById('nextBtn').style.display = 'inline-block';
+                
+                updateUI();
+                showAchievement(`Görev ${currentMission + 1} Tamamlandı!`, totalPoints);
+            }
+        }
+
+        // Başarı göster
+        function showAchievement(title, points) {
+            const achievementDiv = document.createElement('div');
+            achievementDiv.className = 'achievement';
+            achievementDiv.innerHTML = `<strong>${title}</strong><br>+${points} puan!`;
+            
+            document.getElementById('achievements').appendChild(achievementDiv);
+            
+            setTimeout(() => {
+                achievementDiv.remove();
+            }, 3000);
+        }
+
+        // Sonraki görev
+        function nextMission() {
+            currentMission++;
+            gameState.level++;
+            
+            if (currentMission >= missions.length) {
+                showNotification('🎉 Tüm görevler tamamlandı! Harikasın!', 'success');
+                return;
+            }
+            
+            // Oyunu sıfırla
+            const mission = missions[currentMission];
+            gameState.characterPosition = { ...mission.startPos };
+            characterDirection = 0;
+            document.getElementById('nextBtn').style.display = 'none';
+            
+            loadMission(currentMission);
+            startTimer();
+        }
+
+        // Oyunu sıfırla
+        function resetGame() {
+            clearInterval(gameState.timer);
+            const mission = missions[currentMission];
+            gameState.characterPosition = { ...mission.startPos };
+            characterDirection = 0;
+            gameState.isRunning = false;
+            document.getElementById('runBtn').disabled = false;
+            document.getElementById('nextBtn').style.display = 'none';
+            
+            loadMission(currentMission);
+            startTimer();
+        }
+
+        // İpucu göster
+        function showHint() {
+            const mission = missions[currentMission];
+            showNotification(`💡 ${mission.hint}`, 'info');
+        }
+
+        // UI güncelle
+        function updateUI() {
+            document.getElementById('score').textContent = gameState.score;
+            document.getElementById('level').textContent = gameState.level;
+            document.getElementById('completed').textContent = gameState.completed;
+            
+            const progress = (gameState.completed / missions.length) * 100;
+            document.getElementById('progressFill').style.width = `${progress}%`;
+        }
+
+        // Bildirim göster
+        function showNotification(message, type) {
+            const notification = document.createElement('div');
+            notification.className = `notification ${type}`;
+            notification.textContent = message;
+            
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                notification.remove();
+            }, 3000);
+        }
+
+        // Oyunu başlat
+        window.addEventListener('load', initGame);
+    </script>
+</body>
+</html>

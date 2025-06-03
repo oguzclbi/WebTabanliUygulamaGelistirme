@@ -12,3 +12,6 @@ function melodiDurdur() {
     clearInterval(metronom);
 
 }
+
+
+$
